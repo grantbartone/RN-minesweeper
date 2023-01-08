@@ -7,6 +7,16 @@ const NUM_MINES = 10;
 const MINE = "X";
 const MARKED_MINE = "🚩";
 const EXPLODED_MINE = "💥";
+const OFFSETS = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
 
 const getNewBoard = () =>
   Array(BOARD_ROWS)
@@ -27,6 +37,12 @@ const getNewMines = () => {
   }
 
   return mines;
+};
+
+const isInbounds = (row, col) => {
+  if (row < 0 || row >= BOARD_ROWS) return false;
+  if (col < 0 || col >= BOARD_COLS) return false;
+  return true;
 };
 
 export default function App() {
@@ -56,19 +72,13 @@ export default function App() {
 
   const getNumAdjacentMines = (row, col) => {
     let count = 0;
-    for (const [offsetX, offsetY] of [
-      [-1, -1],
-      [-1, 0],
-      [-1, 1],
-      [0, -1],
-      [0, 1],
-      [1, -1],
-      [1, 0],
-      [1, 1],
-    ]) {
-      const isInbounds = row + offsetX >= 0 && col + offsetY >= 0;
-      count +=
-        isInbounds && mines[row + offsetX][col + offsetY] === MINE ? 1 : 0;
+    for (const [offsetX, offsetY] of OFFSETS) {
+      if (
+        isInbounds(row + offsetX, col + offsetY) &&
+        mines[row + offsetX][col + offsetY] === MINE
+      ) {
+        count += 1;
+      }
     }
     return count;
   };
