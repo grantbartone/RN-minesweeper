@@ -4,8 +4,9 @@ import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 const BOARD_ROWS = 8;
 const BOARD_COLS = 8;
 const NUM_MINES = 10;
+const MINE = "X";
 const MARKED_MINE = "🚩";
-const SHOWN_MINE = "💣";
+const EXPLODED_MINE = "💥";
 
 const getNewBoard = () =>
   Array(BOARD_ROWS)
@@ -18,11 +19,11 @@ const getNewMines = () => {
   for (let i = 0; i < NUM_MINES; i++) {
     let row = Math.floor(Math.random() * BOARD_ROWS);
     let col = Math.floor(Math.random() * BOARD_COLS);
-    while (mines[row][col] === "X") {
+    while (mines[row][col] === MINE) {
       row = Math.floor(Math.random() * BOARD_ROWS);
       col = Math.floor(Math.random() * BOARD_COLS);
     }
-    mines[row][col] = "X";
+    mines[row][col] = MINE;
   }
 
   return mines;
@@ -46,17 +47,48 @@ export default function App() {
   };
 
   const incrementMinesRemaining = () => {
-    setMinesRemaining((prev) => (prev === NUM_MINES ? prev : prev + 1));
+    setMinesRemaining((prev) => prev + 1);
   };
 
   const decrementMinesRemaining = () => {
-    setMinesRemaining((prev) => (prev === 0 ? prev : prev - 1));
+    setMinesRemaining((prev) => prev - 1);
+  };
+
+  const getNumAdjacentMines = (row, col) => {
+    let count = 0;
+    for (const [offsetX, offsetY] of [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ]) {
+      const isInbounds = row + offsetX >= 0 && col + offsetY >= 0;
+      count +=
+        isInbounds && mines[row + offsetX][col + offsetY] === MINE ? 1 : 0;
+    }
+    return count;
   };
 
   const handleCellPress = (row, col) => {
     if (isGameOver()) return;
+    if (mines[row][col] === MARKED_MINE) return;
+
+    if (mines[row][col] === MINE) {
+      const nextBoard = [...board];
+      nextBoard[row][col] = EXPLODED_MINE;
+      setBoard(nextBoard);
+      setGameStatus("lose");
+      return;
+    }
 
     // Reveals the mine or number of touching mines
+    const nextBoard = [...board];
+    nextBoard[row][col] = getNumAdjacentMines(row, col);
+    setBoard(nextBoard);
   };
 
   const handleLongCellPress = (row, col) => {
@@ -66,6 +98,7 @@ export default function App() {
     const nextBoard = [...board];
     switch (board[row][col]) {
       case null:
+        if (minesRemaining === 0) return;
         nextBoard[row][col] = MARKED_MINE;
         decrementMinesRemaining();
         break;
