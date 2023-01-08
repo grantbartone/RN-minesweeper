@@ -125,15 +125,17 @@ export default function App() {
         return "😊";
       case "lose":
         return "😢";
-      case "win":
+      case "win": // TODO: add method to calculate 'win' gameStatus
         return "😎";
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text>Mines remaining: {minesRemaining}</Text>
       <View style={styles.board}>
+        <View style={styles.minesRemaining}>
+          <Text style={styles.minesRemainingText}>{minesRemaining}</Text>
+        </View>
         <View style={styles.header}>
           <TouchableOpacity onPress={toggleNewGame}>
             <Text style={styles.newGameButton}>{renderGameEmoji()}</Text>
@@ -161,9 +163,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#efe3ff",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#efe3ff",
   },
   board: {
     justifyContent: "center",
@@ -175,10 +177,25 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   header: {
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 8,
   },
+  minesRemaining: {
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 40,
+    height: 40,
+    top: 12,
+    left: 8,
+    backgroundColor: "#f6b1e3",
+    borderRadius: 3,
+    borderWidth: 2,
+    borderColor: "#f48ad7",
+  },
+  minesRemainingText: { fontSize: 20, fontWeight: "bold", color: "white" },
   newGameButton: { fontSize: 35 },
   row: { flexDirection: "row" },
   cell: {
