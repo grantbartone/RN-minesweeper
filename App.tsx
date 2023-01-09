@@ -83,21 +83,34 @@ export default function App() {
     return count;
   };
 
+  const DFS = (board, row, col) => {
+    if (!isInbounds(row, col) || board[row][col] !== null) return board;
+
+    const numAdjacentMines = getNumAdjacentMines(row, col);
+    board[row][col] = numAdjacentMines;
+    if (numAdjacentMines > 0) return board;
+
+    // Depth-first search to reveal adjacent cells until all cells touch a mine
+    for (const [offsetX, offsetY] of OFFSETS) {
+      board = DFS(board, row + offsetX, col + offsetY);
+    }
+    return board;
+  };
+
   const handleCellPress = (row, col) => {
     if (isGameOver()) return;
     if (mines[row][col] === MARKED_MINE) return;
 
+    let nextBoard = [...board];
     if (mines[row][col] === MINE) {
-      const nextBoard = [...board];
       nextBoard[row][col] = EXPLODED_MINE;
       setBoard(nextBoard);
       setGameStatus("lose");
       return;
     }
 
-    // Reveals the mine or number of touching mines
-    const nextBoard = [...board];
-    nextBoard[row][col] = getNumAdjacentMines(row, col);
+    // Reveals the number of touching mines
+    nextBoard = DFS(nextBoard, row, col);
     setBoard(nextBoard);
   };
 
